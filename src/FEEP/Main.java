@@ -6,39 +6,13 @@ public class Main {
     static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
-        startMenu();
-    }
-
-    private static void startMenu() {
-
-
-        int option = 0;
-        while (option <= 0 || option > 2) {
-
-            System.out.println("Enter an option!");
-            System.out.println("1: Expression to result.");
-            System.out.println("2: Exit");
-            option = in.nextInt();
-            in.nextLine();
-
-            switch (option) {
-                case 1:
-                    expressionToResult();
-                    break;
-                case 2:
-                    return;
-            }
-        }
-    }
-
-    private static void expressionToResult() {
         System.out.println("Enter the expression : ");
 
         String expression = in.nextLine();
 
         System.out.println(eval(expression));
-        startMenu();
     }
+
 
     public static double eval(final String str) {
         return new Object() {
