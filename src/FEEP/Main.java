@@ -19,6 +19,7 @@ public class Main {
             System.out.println("1: Expression to result.");
             System.out.println("2: Exit");
             option = in.nextInt();
+            in.nextLine();
 
             switch (option) {
                 case 1:
@@ -32,7 +33,7 @@ public class Main {
 
     private static void expressionToResult() {
         System.out.println("Enter the expression : ");
-        in.nextLine();
+
         String expression = in.nextLine();
 
         System.out.println(eval(expression));
