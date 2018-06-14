@@ -1,84 +1,88 @@
 package FEEP;
 
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class Main {
-    static Scanner in = new Scanner(System.in);
+
+    static final List<Character> signs = Arrays.asList('+', '-', '*', '/');
 
     public static void main(String[] args) {
-        System.out.println("Enter the expression : ");
+        Scanner in = new Scanner(System.in);
+        String input;
+        while (true) {
+            System.out.println("Enter the expression you wish to evaluate. If you want to exit type exit");
+            input = in.nextLine();
 
-        String expression = in.nextLine();
+            if (input.equals("exit")) {
+                return;
+            }
 
-        System.out.println(eval(expression));
+            System.out.println(eval(input.toCharArray()) ? "Valid" : "Invalid");
+
+            //System.out.println(Pattern.matches("[a-zA-Z0-9\\+\\-\\*/\\(\\)]*", input) ? "Valid" : "Invalid");
+        }
     }
 
+    private static boolean eval(char[] chars) {
+        if (chars[0] != '(' && !Character.isLetter(chars[0]) || chars.length < 3 || chars[0] == ')') {
+            return false;
+        }
+        Stack<Character> stack = new Stack<>();
+        int openingBrackets = 0;
+        int closingBrackets = 0;
+        if (chars[0] == '(') {
+            openingBrackets++;
+        }
+        stack.push(chars[0]);
 
-    public static double eval(final String str) {
-        return new Object() {
-            int pos = -1, ch;
 
-            void nextChar() {
-                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
-            }
-
-            boolean eat(int charToEat) {
-                while (ch == ' ') nextChar();
-                if (ch == charToEat) {
-                    nextChar();
-                    return true;
-                }
+        for (int i = 1; i < chars.length; i++) {
+            if (Character.isDigit(stack.peek())) {
                 return false;
             }
-
-            double parse() {
-                nextChar();
-                double x = parseExpression();
-                if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char) ch);
-                return x;
-            }
-
-            double parseExpression() {
-                double x = parseTerm();
-                for (; ; ) {
-                    if (eat('+')) x += parseTerm();
-                    else if (eat('-')) x -= parseTerm();
-                    else return x;
+            if (chars[i] == '(') {
+                if (Character.isLetter(stack.peek())) {
+                    return false;
                 }
+                openingBrackets++;
+                stack.push(chars[i]);
+                continue;
             }
-
-            double parseTerm() {
-                double x = parseFactor();
-                for (; ; ) {
-                    if (eat('*')) x *= parseFactor();
-                    else if (eat('/')) x /= parseFactor();
-                    else return x;
+            if (Character.isLetter(stack.peek())) {
+                if (!signs.contains(chars[i]) && chars[i] != ')') {
+                    return false;
                 }
-            }
-
-            double parseFactor() {
-                if (eat('+')) return parseFactor();
-                if (eat('-')) return -parseFactor();
-
-                double x;
-                int startPos = this.pos;
-                if (eat('(')) {
-                    x = parseExpression();
-                    eat(')');
-                } else if ((ch >= '0' && ch <= '9') || ch == '.') {
-                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-                    x = Double.parseDouble(str.substring(startPos, this.pos));
-                } else if (ch >= 'a' && ch <= 'z') {
-                    while (ch >= 'a' && ch <= 'z') nextChar();
-                    String func = str.substring(startPos, this.pos);
-                    x = parseFactor();
-                } else {
-                    throw new RuntimeException("Unexpected: " + (char) ch);
+                if (chars[i] == ')') {
+                    closingBrackets++;
                 }
+                stack.push(chars[i]);
+            } else if (signs.contains(stack.peek())) {
+                if (!Character.isLetter(chars[i]) && chars[i] != '(') {
+                    return false;
+                }
+                if (chars[i] == '(') {
+                    openingBrackets++;
+                }
+                stack.push(chars[i]);
 
-
-                return x;
+            } else if (stack.peek() == '(') {
+                if (signs.contains(chars[i]) || chars[0] == ')') {
+                    return false;
+                }
+                stack.push(chars[i]);
+            } else if (stack.peek() == ')') {
+                if (!signs.contains(chars[i]) && chars[i] != ')') {
+                    return false;
+                }
+                stack.push(chars[i]);
             }
-        }.parse();
+
+
+        }
+        if (stack.peek() != ')' && !Character.isLetter(stack.peek())) {
+            return false;
+        }
+        return openingBrackets == closingBrackets;
     }
 }
