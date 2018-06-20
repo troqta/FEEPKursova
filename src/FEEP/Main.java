@@ -1,7 +1,6 @@
 package FEEP;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class Main {
 
@@ -18,71 +17,65 @@ public class Main {
                 return;
             }
 
-            System.out.println(eval(input.toCharArray()) ? "Valid" : "Invalid");
+            System.out.println(isValidExpression2(input) ? "Valid" : "Invalid");
 
             //System.out.println(Pattern.matches("[a-zA-Z0-9\\+\\-\\*/\\(\\)]*", input) ? "Valid" : "Invalid");
         }
     }
 
-    private static boolean eval(char[] chars) {
-        if (chars[0] != '(' && !Character.isLetter(chars[0]) || chars.length < 3 || chars[0] == ')') {
+
+
+    public static boolean isAnOperator(char c) {
+        switch (c) {
+            case '*':
+            case '/':
+            case '+':
+            case '-':
+            case '%':
+                return true;
+            default:
+                return false;
+        }
+    }
+    public static boolean isALetter(char c){
+        return Character.isLetter(c);
+    }
+
+    public static boolean isValidExpression2(String expression) {
+        // TEST 1
+        if (isAnOperator(expression.charAt(0)) || isAnOperator(expression.charAt(expression.length() - 1))) {
             return false;
         }
-        Stack<Character> stack = new Stack<>();
-        int openingBrackets = 0;
-        int closingBrackets = 0;
-        if (chars[0] == '(') {
-            openingBrackets++;
-        }
-        stack.push(chars[0]);
 
+        int openParenthCount = 0;
+        boolean lastWasOp = false;
+        boolean lastWasOpen = false;
 
-        for (int i = 1; i < chars.length; i++) {
-            if (Character.isDigit(stack.peek())) {
+        for (char c : expression.toCharArray()) {
+            if(c == ' ') continue;
+            if (c == '(') {
+                openParenthCount++;
+                lastWasOpen = true;
+                continue;
+            } else if (c == ')') {
+                if (openParenthCount <= 0 || lastWasOp) {
+                    return false;
+                }
+                openParenthCount--;
+            }else if (isAnOperator(c)){
+                if (lastWasOp || lastWasOpen) return false;
+                lastWasOp = true;
+                continue;
+            }else if(!isALetter(c)){
                 return false;
             }
-            if (chars[i] == '(') {
-                if (Character.isLetter(stack.peek())) {
-                    return false;
-                }
-                openingBrackets++;
-                stack.push(chars[i]);
-                continue;
-            }
-            if (Character.isLetter(stack.peek())) {
-                if (!signs.contains(chars[i]) && chars[i] != ')') {
-                    return false;
-                }
-                if (chars[i] == ')') {
-                    closingBrackets++;
-                }
-                stack.push(chars[i]);
-            } else if (signs.contains(stack.peek())) {
-                if (!Character.isLetter(chars[i]) && chars[i] != '(') {
-                    return false;
-                }
-                if (chars[i] == '(') {
-                    openingBrackets++;
-                }
-                stack.push(chars[i]);
-
-            } else if (stack.peek() == '(') {
-                if (signs.contains(chars[i]) || chars[0] == ')') {
-                    return false;
-                }
-                stack.push(chars[i]);
-            } else if (stack.peek() == ')') {
-                if (!signs.contains(chars[i]) && chars[i] != ')') {
-                    return false;
-                }
-                stack.push(chars[i]);
-            }
-
-
+            lastWasOp = false;
+            lastWasOpen = false;
         }
-        if (stack.peek() != ')' && !Character.isLetter(stack.peek())) {
-            return false;
-        }
-        return openingBrackets == closingBrackets;
+        if(openParenthCount != 0) return false;
+        if(lastWasOp || lastWasOpen) return false;
+        return true;
     }
+
+
 }
